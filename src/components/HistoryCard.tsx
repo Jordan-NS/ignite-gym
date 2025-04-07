@@ -17,16 +17,17 @@ export function HistoryCard({ name, group, hour }: Props) {
       rounded="$md"
       alignItems="center"
       justifyContent="space-between">
-      <VStack mr="$5">
+      <VStack flex={1} mr="$5">
         <Heading 
         color="$white" 
         fontSize="$md"
         textTransform="capitalize"
         fontFamily="$heading"
+        numberOfLines={1}
         >
           {name}
         </Heading>
-        <Text color="$gray100" fontSize="$lg" numberOfLines={1}>
+        <Text color="$gray100" fontSize="$lg" >
           {group}
         </Text>
       </VStack>

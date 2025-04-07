@@ -32,7 +32,7 @@ export function SignIn() {
           </Center>
 
           <Center gap="$2">
-            <Heading color="$gray100" fontWeight="bold">
+            <Heading color="$gray100" fontWeight="bold" mb="$6">
               Acesse sua conta
             </Heading>
             <Input
