@@ -1,15 +1,23 @@
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { VStack, Image, Center, Text, Heading, ScrollView } from "@gluestack-ui/themed";
+import { VStack, Image, Center, Text, Heading, ScrollView, useToast, Toast, ToastTitle } from "@gluestack-ui/themed";
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+
+
+import { AppError } from "@utils/AppError";
+
+import { api } from "@services/api";
+import { useAuth } from "@hooks/useAuth";
 
 import BackgroundImg from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { ToastMessage } from "@components/ToastMessage";
 
 type FormDataProps = {
   name: string;
@@ -28,6 +36,12 @@ const signUpSchema = yup.object({
 
 export function SignUp() {
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { signIn } = useAuth();
+
+  const toast = useToast();
+
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(signUpSchema),
   });
@@ -38,8 +52,30 @@ export function SignUp() {
     navigation.goBack();
   }
 
-  function handleSignUp({ name, email, password, confirmPassword }: FormDataProps) {
-    console.log({ name, email, password, confirmPassword });
+  async function handleSignUp({ name, email, password }: FormDataProps) {
+    try {
+      setIsLoading(true);
+
+      await api.post('/users', { name, email, password })
+
+      await signIn(email, password);
+
+    } catch (error) {
+      setIsLoading(false);
+
+      const isAppError = error instanceof AppError;
+      
+      const title = isAppError ? error.message : "Erro ao processar, tente novamente mais tarde.";
+
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Toast bg="$red500" action="error" variant="outline">
+            <ToastTitle color="$white">{title}</ToastTitle>
+          </Toast>
+        )
+      })
+    }
   }
 
   return (
@@ -119,7 +155,7 @@ export function SignUp() {
                 />
               )}
             />
-            <Button title="Criar e acessar" onPress={handleSubmit(handleSignUp)} />
+            <Button title="Criar e acessar" onPress={handleSubmit(handleSignUp)} isLoading={isLoading} />
           </Center>
 
           <Button title="Voltar para o login" variant="outline" mt="$12" onPress={handleGoBack} />
